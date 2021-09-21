@@ -4,6 +4,8 @@ import styled from "@emotion/styled";
 import ContactsForm from "./Components/ContactsForm/ContactsForm";
 import ContactsList from "./Components/ContactList/ContactsList";
 import { ContactsFilter } from "./Components/ContactsFilter/ContactsFilter";
+import toast, { Toaster } from 'react-hot-toast';
+import { FaBan } from "react-icons/fa";
 
 const Wrapper = styled.div`
   padding-left: 15px;
@@ -14,21 +16,30 @@ const Wrapper = styled.div`
 
 export class App extends Component {
   state = {
-    contacts: [
-      { id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
-      { id: "id-2", name: "Hermione Kline", number: "443-89-12" },
-      { id: "id-3", name: "Eden Clements", number: "645-17-79" },
-      { id: "id-4", name: "Annie Copeland", number: "227-91-26" },
-    ],
-
+    contacts: [ ],
     filter: "",
   };
+
+  componentDidMount() {
+    const contacts = localStorage.getItem('contacts');
+    const parsedContacts = JSON.parse(contacts);
+
+    if (parsedContacts) {
+      this.setState({contacts: parsedContacts})
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState !== this.state) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts))
+    }
+ }
 
   handleOnSubmitForm = ({ name, number }) => {
     const contactsName = this.state.contacts.map((contact) => contact.name);
 
     if (contactsName.includes(name)) {
-      alert(`You already have ${name} in your contacts!`);
+      toast.error(`You already have ${name} in your contacts!`, { icon: <FaBan fill='red'/>});
     } else {
       const newContact = {
         id: shortid.generate(),
@@ -39,6 +50,8 @@ export class App extends Component {
       this.setState(({ contacts }) => ({
         contacts: [newContact, ...contacts],
       }));
+      
+      toast.success(`${name} added to your contacts!`)
     }
   };
 
@@ -46,10 +59,11 @@ export class App extends Component {
     this.setState({ filter: event.currentTarget.value });
   };
 
-  deleteContact = (id) => {
+  deleteContact = (id, name) => {
     this.setState((prevState) => ({
       contacts: prevState.contacts.filter((contact) => contact.id !== id),
     }));
+    toast.success(`${name} removed from your contacts`)
   };
 
   getVisibleContacts = () => {
@@ -66,6 +80,7 @@ export class App extends Component {
 
     return (
       <Wrapper>
+        <Toaster/>
         <h1>Phonebook</h1>
         <ContactsForm onSubmit={this.handleOnSubmitForm} />
         <h2>Contacts</h2>

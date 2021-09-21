@@ -34,6 +34,7 @@ export class ContactsForm extends Component {
         <Label>
           Name
           <Input
+            autoComplete="off"
             type="text"
             name="name"
             value={this.state.name}
@@ -46,6 +47,7 @@ export class ContactsForm extends Component {
         <Label bottom>
           Number
           <Input
+            autoComplete="off"
             type="tel"
             name="number"
             value={this.state.number}
